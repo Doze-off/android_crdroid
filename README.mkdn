@@ -1,92 +1,87 @@
-![alt text][logo]
+<div align="center">
+  <a href="https://github.com/ProjectInfinity-X">
+    <img src="https://camo.githubusercontent.com/afcb6f7b08a4af0886e4b1cf9abe2ecec216b08bc815a5fdccc25816e3b3909d/68747470733a2f2f637264726f69642e6e65742f696d672f6c6f676f2e706e67" width="70%" />
+  </a>
+</div>
 
-[logo]:https://crdroid.net/img/logo.png "crDroid Android"
 
-## 1. Grabbing the source ##
+CrDroid GSI Treble
+------------------
 
-[Repo](http://source.android.com/source/developing.html) is a tool provided by Google that
-simplifies using [Git](http://git-scm.com/book) in the context of the Android source.
+This is a GSI trebledroid with patches for specific devices, BPF bypass, firewall bypass, and much more.
 
-### 1.1 Installing dependencies and Repo ###
+------------------
 
-Several packages are needed in order to build crDroid
-```
-sudo apt install bc bison build-essential ccache curl flex g++-multilib gcc-multilib git git-lfs gnupg gperf imagemagick lib32ncurses-dev lib32readline-dev lib32z1-dev liblz4-tool libncurses6 libncurses-dev libsdl1.2-dev libssl-dev libwxgtk3.2-dev libxml2 libxml2-utils lzop pngcrush rsync schedtool squashfs-tools xsltproc zip zlib1g-dev
-```
+Create an overlay for your device to increase compatibility with GSI.
 
-Install Repo tool
-```bash
-# Make a directory where Repo will be stored and add it to the path
-$ mkdir ~/bin
-$ PATH=~/bin:$PATH
+build_overlay:
 
-# Download Repo itself
-$ curl https://storage.googleapis.com/git-repo-downloads/repo > ~/bin/repo
+Manual method: 
+For creating an overlay, follow this guide: How to create an overlay https://github.com/TrebleDroid/treble_experimentations/wiki/How-to-create-an-overlay%3F?
+Before submitting your overlay to the repository, make a correction using the #fix_overlay note in support group.
 
-# Make Repo executable
-$ chmod a+x ~/bin/repo
-```
+Semi-automatic tool: 
+Required Linux pc or Termux, automatically creates flashable module: https://github.com/uzbforce/treble-rro-creator
 
-### 1.2 Initializing Repo ###
+Submit your overlay to this repository: https://github.com/Doze-off/vendor_hardware_overlay
 
-```bash
-# Create a directory for the source files
-# This can be located anywhere (as long as the fs is case-sensitive)
-$ mkdir crDroid
-$ cd crDroid
+---
 
-# Install Repo in the created directory
-$ repo init -u https://github.com/crdroidandroid/android.git -b 15.0 --git-lfs
-```
+Verify Overlay Status
 
-This is what you will run each time you want to pull in upstream changes. Keep in mind that on your
-first run, it is expected to take a while as it will download all the required Android source files
-and their change histories.
+PC:
+adb shell cmd overlay list --user current
 
-```bash
-# Let Repo take care of all the hard work
-$ repo sync
-```
+Termux:
+su
+cmd overlay list --user current
 
-```bash
-# Run to prepare our devices list
-$ . build/envsetup.sh
-# ... now run
-$ brunch devicecodename
-```
+You should see something like:
+android
+[x]
+me.phh.treble.overlay.hotwav.w10pro
 
-## 2. Contributions ##
+------------------
 
-To submit changes/patches, please send a pull request on GitHub. We will review and merge.
+How to flash ?
 
-## 3. How to become an Official Maintainer ##
+🚨Test first in dsu sideloader use [DSU Sideloader](https://github.com/VegaBobo/DSU-Sideloader)
 
-Make sure you can follow our [rules-and-guidelines](https://github.com/crdroidandroid/rules-and-guidelines), then if all is right, just message Gabriel over [Telegram](https://telegram.me/gwolf2u) with the device you want to maintain.
+There is no universal installation method, as each device has some different commands, but the one that works best is this one 
 
-## 4. crDroid features / overlays, translations, forum template and OTA ##
+You can get vbmeta from the stock rom or from google
 
-### 4.1 crDroid features / overlays ###
-Set those overlays to proper paths
+🟢 Clean Flash (GSI):
 
-Frameworks base  
-```overlay/frameworks/base/core/res/res/values/config.xml```  
-[https://github.com/crdroidandroid/android_frameworks_base/blob/15.0/core/res/res/values/cr_config.xml](https://github.com/crdroidandroid/android_frameworks_base/blob/15.0/core/res/res/values/cr_config.xml)
+fastboot devices 
 
-SystemUI  
-```overlay/frameworks/base/packages/SystemUI/res/values/config.xml```  
-[https://github.com/crdroidandroid/android_frameworks_base/blob/15.0/packages/SystemUI/res/values/cr_config.xml](https://github.com/crdroidandroid/android_frameworks_base/blob/15.0/packages/SystemUI/res/values/cr_config.xml)
+fastboot --disable-verification flash vbmeta vbmeta.img 
 
-### 4.2 Translations ###
-We use Crowdin for translations since it is easy and everyone can do it.  
-To help out click [here](https://github.com/crdroidandroid/crdroid_features#translations).
+fastboot --disable-verity --disable-verification flash vbmeta_system vbmeta_system.img 
 
-### 4.3 Forum template ###
-Build ready? Tested all features and translations are smooth?  
-Why not share your build over your beloved forums?  
-To do so, we have made a [small template](https://github.com/crdroidandroid/crdroid_features/blob/15.0/ForumPostTemplate) to help out. Just edit what you need and let the downloads roll. :sunglasses:
+fastboot reboot fastboot 
 
-### 4.4 OTA ###
-So posted on forums and your users are enjoying your build.  
-Well you can help out your users by letting them know when you fix stuff in your builds with the help of our OTA app.   
-Since crDroid Oreo, if you want to be on the official maintainers list, you'll need to provide OTA access.  
-You can set it up really easy by reading [android_vendor_crDroidOTA](https://github.com/crdroidandroid/android_vendor_crDroidOTA/blob/15.0/README.md) repo description.
+fastboot erase system 
+
+fastboot flash system system.img 
+
+fastboot reboot recovery 
+→ Clear data/cache
+→ Factory reset
+
+⚠️ Error: "out of space" when flashing, use: 
+fastboot delete-logical-partition product 
+
+❗️If the error persists, use:
+fastboot delete-logical-partition system 
+fastboot create-logical-partition system 0 
+
+🔴 Dirty Flash: 
+fastboot flash system system.img
+
+------------------
+
+### Support Group: [DozeOff GSI Treble](https://t.me/dozeoff_treble)
+
+Big thanks 
+for @TrebleDroid for some patches
